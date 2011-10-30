@@ -113,6 +113,27 @@ module ActiveAdmin
 
     private
 
+    def input_class(as)
+      @input_classes_cache ||= {}
+      @input_classes_cache[as] ||= begin
+        begin
+          begin
+            custom_input_class_name(as).constantize
+          rescue NameError
+            begin
+              active_admin_input_class_name(as).constantize
+            rescue NameError
+              standard_input_class_name(as).constantize
+            end
+          end
+        rescue NameError
+          raise Formtastic::UnknownInputError
+        end
+      end
+    end
+
+    private
+
     def with_new_form_buffer
       form_buffers << "".html_safe
       return_value = yield
